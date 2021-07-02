@@ -1,7 +1,7 @@
-using System;
-using System.Text.RegularExpressions;
 using Sirenix.OdinInspector;
 using Sirenix.Utilities;
+using System;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
@@ -15,57 +15,68 @@ public class AssetOrganizationConfig
         Extension,
         Regex
     }
-    
-    [TableColumnWidth(100, Resizable = false)]
-    public FilterType filterType;
 
-    [GUIColor("HighlightFilterStringValidity")]
-    public string filterString;
+    [TableColumnWidth(100, Resizable = false)]
+    public FilterType Filter;
+
+    [ValueColor(nameof(FilterStatusColor))]
+    public string FilterString;
 
     [FolderPath(UseBackslashes = true)]
-    [GUIColor("HighlightDestinationFolderValidity")]
-    public string destinationFolder;
+    [ValueColor(nameof(DestinationFolderStatusColor))]
+    public string DestinationFolder;
 
-    private Color HighlightFilterStringValidity()
+    private Color FilterStatusColor()
     {
-        if (filterString.IsNullOrWhitespace()) 
+        if (FilterString.IsNullOrWhitespace())
+        {
             return AssetOrganizerColors.Error;
-        
-        switch (filterType)
+        }
+
+        switch (Filter)
         {
             case FilterType.Prefix:
             case FilterType.Suffix:
                 return AssetOrganizerColors.Success;
-            
+
             case FilterType.Extension:
-                return filterString.StartsWith(".")
-                    ? AssetOrganizerColors.Success
-                    : AssetOrganizerColors.Error;
-            
+                return FilterString.StartsWith(".")
+                    ? AssetOrganizerColors.Error
+                    : AssetOrganizerColors.Success;
+
             case FilterType.Regex:
-                return IsValidRegex(filterString)
+                return IsValidRegex(FilterString)
                     ? AssetOrganizerColors.Success
                     : AssetOrganizerColors.Error;
-            
-            default: 
+
+            default:
                 return AssetOrganizerColors.Success;
         }
     }
 
-    private Color HighlightDestinationFolderValidity()
+    private Color DestinationFolderStatusColor()
     {
-        if (destinationFolder.IsNullOrWhitespace())
+        if (DestinationFolder.IsNullOrWhitespace() || !DestinationFolder.StartsWith("Assets"))
+        {
             return AssetOrganizerColors.Error;
+        }
 
-        return AssetDatabase.IsValidFolder(destinationFolder)
+        return AssetDatabase.IsValidFolder(DestinationFolder)
             ? AssetOrganizerColors.Success
             : AssetOrganizerColors.Caution;
     }
 
     private static bool IsValidRegex(string pattern)
     {
-        try { Regex.Match("", pattern); }
-        catch (ArgumentException) { return false; }
+        try
+        {
+            Regex.Match("", pattern);
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
+
         return true;
     }
 }
